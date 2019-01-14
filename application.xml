@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<board type="Arduino Uno" name="Barrel Drop Ethernet">
+    <info>
+        An ethernet activated relay 
+    </info>
+    
+    <devices>
+        <device name="Ethernet" type="ENC28J60">
+        </device>
+        <device name="Relay Output" type="Digital Output">
+            <setting id="pin" value="2"></setting>
+        </device>
+        
+    </devices>
+
+    <parameters>
+        <parameter name="On Time" type="Integer">
+            <setting id="clip" value="true"/>
+            <setting id="min" value="0"/>
+            <setting id="use_eeprom" value="true"/>
+        </parameter>
+    </parameters>
+
+    <modules>
+    	<module>HTTP Get Server</module>
+        <module>Oneshot Task</module>
+    </modules>
+
+    <custom_code>
+    	<file>handler.cpp</file>
+    </custom_code>
+
+    <defines>
+        <define>ENC28J60_BUFFER_SIZE 256</define>
+    </defines>
+
+    <adl protocol="url"></adl>
+</board>
