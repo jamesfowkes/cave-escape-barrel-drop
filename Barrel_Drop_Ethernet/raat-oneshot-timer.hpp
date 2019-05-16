@@ -1,10 +1,10 @@
-#ifndef _ADL_ONESHOT_TIMER_H_
-#define _ADL_ONESHOT_TIMER_H_
+#ifndef _RAAT_ONESHOT_TIMER_H_
+#define _RAAT_ONESHOT_TIMER_H_
 
-class ADLOneShotTimer
+class RAATOneShotTimer
 {
 public:
-    ADLOneShotTimer(uint16_t period);
+    RAATOneShotTimer(uint16_t period);
     void start(uint16_t period = 0);
     bool check();
     void reset();

@@ -1,21 +1,23 @@
-#ifndef _ADL_H_
-#define _ADL_H_
+#ifndef _RAAT_H_
+#define _RAAT_H_
 
+#ifndef BEHAVETESTS
 #include <Arduino.h>
+#endif
 
-#include "adl-defs.h"
-#include "adl-nv.h"
-#include "adl-serial.h"
-#include "adl-logging.h"
-#include "adl-util.h"
-#include "device.h"
-#include "parameter.h"
-#include "adl-interface.h"
-#include "adl-messages.h"
-#include "protocol.h"
-#include "adl-application.h"
+#include "raat-defs.hpp"
+#include "raat-nv.hpp"
+#include "raat-serial.hpp"
+#include "raat-logging.hpp"
+#include "raat-util.hpp"
+#include "device.hpp"
+#include "parameter.hpp"
+#include "raat-interface.hpp"
+#include "raat-messages.hpp"
+#include "protocol.hpp"
+#include "raat-application.hpp"
 
-#include "adl-callbacks.h"
+#include "raat-callbacks.hpp"
 
 #define inrange(n, lo, hi) ((lo <= n) && (hi >= n))
 

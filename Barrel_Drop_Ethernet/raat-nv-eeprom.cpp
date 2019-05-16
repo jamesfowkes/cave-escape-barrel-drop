@@ -11,10 +11,10 @@
 #include <EEPROM.h>
 
 /*
- * ADL Includes
+ * RAAT Includes
  */
 
-#include "adl.h"
+#include "raat.hpp"
 
 /*
  * Private Variables
@@ -26,18 +26,18 @@ static uint16_t s_next_eeprom_address = 0;
  * Public Functions
  */
 
-void adl_nonvolatile_setup()
+void raat_nonvolatile_setup()
 {
 
 }
 
-void adl_nv_alloc(ADL_NV_LOCATION& to_alloc)
+void raat_nv_alloc(RAAT_NV_LOCATION& to_alloc)
 {
 	to_alloc.address = s_next_eeprom_address;
 	s_next_eeprom_address += to_alloc.size;
 }
 
-void adl_nv_load(void * dst, ADL_NV_LOCATION& load_from)
+void raat_nv_load(void * dst, RAAT_NV_LOCATION& load_from)
 {
     uint8_t i;
     if(dst)
@@ -49,7 +49,7 @@ void adl_nv_load(void * dst, ADL_NV_LOCATION& load_from)
     }
 }
 
-void adl_nv_save(void * src, ADL_NV_LOCATION& save_to)
+void raat_nv_save(void * src, RAAT_NV_LOCATION& save_to)
 {
     uint8_t i;
     if(src)

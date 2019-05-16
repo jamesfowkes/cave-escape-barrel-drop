@@ -5,9 +5,9 @@
 
 #include <stdio.h>
 
-#include "adl.h"
+#include "raat.hpp"
 
-bool adl_convert_numeric_range(char const * const range, int32_t& min, int32_t& max, char** p_end)
+bool raat_convert_numeric_range(char const * const range, int32_t& min, int32_t& max, char** p_end)
 {
     char * p_local_end;
     bool valid_min = false;
@@ -19,8 +19,8 @@ bool adl_convert_numeric_range(char const * const range, int32_t& min, int32_t& 
 
         if (p_separator)
         {
-            valid_min = adl_parse_single_numeric(range, min, &p_local_end);
-            valid_max = adl_parse_single_numeric(p_separator+1, max, &p_local_end);
+            valid_min = raat_parse_single_numeric(range, min, &p_local_end);
+            valid_max = raat_parse_single_numeric(p_separator+1, max, &p_local_end);
         }
         else
         {
@@ -43,7 +43,7 @@ bool adl_convert_numeric_range(char const * const range, int32_t& min, int32_t& 
     return (valid_min && valid_max);
 }
 
-bool adl_parse_single_numeric(char const * const numeric, int32_t& parsed, char** p_end)
+bool raat_parse_single_numeric(char const * const numeric, int32_t& parsed, char** p_end)
 {
     if (!numeric) { return false; }
 
@@ -74,7 +74,7 @@ static bool string_is_valid_for_csv_numerics(char const * s)
     return true;
 }
 
-uint8_t adl_parse_comma_separated_numerics(char const * const s, int32_t * presults)
+uint8_t raat_parse_comma_separated_numerics(char const * const s, int32_t * presults)
 {
     if (!s) { return 0; }
     if (!presults) { return 0; }
@@ -88,7 +88,7 @@ uint8_t adl_parse_comma_separated_numerics(char const * const s, int32_t * presu
 
     do
     {
-        converted = adl_parse_single_numeric(p, presults[count], (char**)&p);
+        converted = raat_parse_single_numeric(p, presults[count], (char**)&p);
         if (converted) { count++; };
         
         continue_with_conversion = (*p==',');

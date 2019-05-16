@@ -1,27 +1,26 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "adl.h"
-#include "adl-buffer.h"
+#include "raat.hpp"
+#include "raat-buffer.hpp"
 
-#include "adl-oneshot-timer.h"
-#include "adl-oneshot-task.h"
+#include "raat-oneshot-timer.hpp"
+#include "raat-oneshot-task.hpp"
 
-#include "http-get-server.h"
+#include "http-get-server.hpp"
 
 static HTTPGetServer s_server(true);
 
 static DigitalOutput * pRelay;
-static IntegerParam * pOnTime;
 
-static void relay_delay_task_fn(ADLOneShotTask& pThisTask, void * pTaskData)
+static void relay_delay_task_fn(RAATOneShotTask& pThisTask, void * pTaskData)
 {
     (void)pThisTask;
     (void)pTaskData;
     
     pRelay->set(false);
 }
-static ADLOneShotTask s_relay_delay_task(3000, relay_delay_task_fn, NULL);
+static RAATOneShotTask s_relay_delay_task(3000, relay_delay_task_fn, NULL);
 
 static void send_standard_erm_response()
 {
@@ -32,17 +31,34 @@ static void send_standard_erm_response()
 
 static void relay_open(char const * const url)
 {
-    (void)url;
-    pRelay->set(true);
-    s_relay_delay_task.set_period(pOnTime->get() * 1000);
-    s_relay_delay_task.start();
+    int32_t timeout;
+
+    char const * const pTime = &url[13];
+
+    bool success = false;
+
     send_standard_erm_response();
+
+    if ((success = raat_parse_single_numeric(pTime, timeout, NULL)))
+    {
+        if (timeout < 200) { timeout = 200; }
+        timeout = (timeout / 100) * 100;
+        pRelay->set(true);
+        s_relay_delay_task.set_period(timeout);
+        s_relay_delay_task.start();
+        s_server.add_body_P(PSTR("OK\r\n\r\n"));
+    }
+    else
+    {
+        s_server.add_body_P(PSTR("?\r\n\r\n"));
+    }
 }
+
+static const char BARREL_OPEN_URL[] PROGMEM = "/barrel/open";
 
 static http_get_handler s_handlers[] = 
 {
-    {"/barrel/open", relay_open},
-    {"/command/", relay_open},
+    {BARREL_OPEN_URL, relay_open},
     {"", NULL}
 };
 
@@ -56,13 +72,13 @@ char * ethernet_response_provider()
     return s_server.get_response();
 }
 
-void adl_custom_setup(const adl_devices_struct& devices, const adl_params_struct& params)
+void raat_custom_setup(const raat_devices_struct& devices, const raat_params_struct& params)
 {
+    (void)params;
     pRelay = devices.pRelay_Output;
-    pOnTime = params.pOn_Time;
 }
 
-void adl_custom_loop(const adl_devices_struct& devices, const adl_params_struct& params)
+void raat_custom_loop(const raat_devices_struct& devices, const raat_params_struct& params)
 {
     (void)devices; (void)params;
     s_relay_delay_task.run();

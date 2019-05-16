@@ -6,23 +6,23 @@
 #include <stdlib.h>
 
 /*
- * ADL Includes
+ * RAAT Includes
  */
 
-#include "adl.h"
+#include "raat.hpp"
 
-#include "adl-oneshot-timer.h"
+#include "raat-oneshot-timer.hpp"
 
 /*
  * Class Functions
  */
 
-ADLOneShotTimer::ADLOneShotTimer(uint16_t period) : m_period(period), m_running(false)
+RAATOneShotTimer::RAATOneShotTimer(uint16_t period) : m_period(period), m_running(false)
 {
 
 }
 
-void ADLOneShotTimer::start(uint16_t period)
+void RAATOneShotTimer::start(uint16_t period)
 {
     if (period)
     {
@@ -32,30 +32,30 @@ void ADLOneShotTimer::start(uint16_t period)
     m_start = millis();
 }
 
-bool ADLOneShotTimer::check()
+bool RAATOneShotTimer::check()
 {
     return m_running ? m_period <= (millis() - m_start) : false;
 }
 
-void ADLOneShotTimer::reset()
+void RAATOneShotTimer::reset()
 {
     m_running = false;
 }
 
-bool ADLOneShotTimer::is_running()
+bool RAATOneShotTimer::is_running()
 {
     return m_running;
 }
 
 
-bool ADLOneShotTimer::check_and_reset()
+bool RAATOneShotTimer::check_and_reset()
 {
     bool expired = this->check();
     if (expired) { this->reset(); }
     return expired;
 }
 
-bool ADLOneShotTimer::check_and_restart()
+bool RAATOneShotTimer::check_and_restart()
 {
     bool expired = this->check();
     if (expired)
@@ -66,7 +66,7 @@ bool ADLOneShotTimer::check_and_restart()
     return expired;
 }
 
-void ADLOneShotTimer::set_period(uint16_t period)
+void RAATOneShotTimer::set_period(uint16_t period)
 {
     m_period = period;
 }

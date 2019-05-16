@@ -3,18 +3,18 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "adl.h"
-#include "protocol.h"
+#include "raat.hpp"
+#include "protocol.hpp"
 
-// ADL receives into this buffer
-static char s_adl_recv_buffer[ADL_BUFFER_SIZE];
+// RAAT receives into this buffer
+static char s_raat_recv_buffer[RAAT_BUFFER_SIZE];
 static uint32_t s_recv_idx = 0;
 
-// ADL builds reply strings into this buffer
-static char s_adl_tx_buffer[ADL_BUFFER_SIZE];
+// RAAT builds reply strings into this buffer
+static char s_raat_tx_buffer[RAAT_BUFFER_SIZE];
 
-// ADL passes this buffer to application to fill with command replies 
-static char s_adl_reply_buffer[ADL_BUFFER_SIZE];
+// RAAT passes this buffer to application to fill with command replies 
+static char s_raat_reply_buffer[RAAT_BUFFER_SIZE];
 
 static bool s_command_pending = false;
 
@@ -27,16 +27,16 @@ static inline bool end_of_command(char c)
     return c == '\n';
 }
 
-static int adl_board_device_command(char const * const command, char * reply)
+static int raat_board_device_command(char const * const command, char * reply)
 {
     int reply_length = 0;
     if (command[0] == 'R')
     {
         int i = 0;
 
-        for (i = 1; i <= ADL_DEVICE_COUNT; i++)
+        for (i = 1; i <= RAAT_DEVICE_COUNT; i++)
         {
-            adl_get_device(i).reset();
+            raat_get_device(i).reset();
         }
             
         strcpy(reply, "ROK");
@@ -50,16 +50,16 @@ static int adl_board_device_command(char const * const command, char * reply)
     return reply_length;
 }
 
-static int adl_board_param_command(char const * const command, char * reply)
+static int raat_board_param_command(char const * const command, char * reply)
 {
     int reply_length = 0;
     if (command[0] == 'R')
     {
         int i = 0;
 
-        for (i = 1; i <= ADL_PARAM_COUNT; i++)
+        for (i = 1; i <= RAAT_PARAM_COUNT; i++)
         {
-            adl_get_param(i).reset();
+            raat_get_param(i).reset();
         }
 
         strcpy(reply, "ROK");
@@ -73,61 +73,61 @@ static int adl_board_param_command(char const * const command, char * reply)
     return reply_length;
 }
 
-static int adl_process_device_command(DEVICE_ADDRESS address, char const * const command, char * reply)
+static int raat_process_device_command(DEVICE_ADDRESS address, char const * const command, char * reply)
 {
     int reply_length = 0;
 
-    if (address == ADL_BOARD_ADDRESS)
+    if (address == RAAT_BOARD_ADDRESS)
     {
-        reply_length = adl_board_device_command(command, reply);
+        reply_length = raat_board_device_command(command, reply);
     }
-    else if (address > ADL_DEVICE_COUNT)
+    else if (address > RAAT_DEVICE_COUNT)
     {
         strcpy(reply, "?");
         reply_length = strlen(reply);
     }
     else
     {
-        reply_length = adl_get_device_cmd_handler(address)(command, reply);
+        reply_length = raat_get_device_cmd_handler(address)(command, reply);
     }
 
     return reply_length;
 }
 
-static int adl_process_param_command(PARAM_ADDRESS address, char const * const command, char * reply)
+static int raat_process_param_command(PARAM_ADDRESS address, char const * const command, char * reply)
 {
     int reply_length = 0;
 
-    if (address == ADL_BOARD_ADDRESS)
+    if (address == RAAT_BOARD_ADDRESS)
     {
-        return adl_board_param_command(command, reply);
+        return raat_board_param_command(command, reply);
     }
-    else if (address > ADL_PARAM_COUNT)
+    else if (address > RAAT_PARAM_COUNT)
     {
         strcpy(reply, "?");
         return strlen(reply);
     }
     else
     {
-        reply_length = adl_get_param_cmd_handler(address)(command, reply);
+        reply_length = raat_get_param_cmd_handler(address)(command, reply);
     }
 
     return reply_length;
 }
 
-int adl_chars_to_address(char const * const buffer)
+int raat_chars_to_address(char const * const buffer)
 {
     return ((buffer[0] - '0') * 10) + (buffer[1] - '0');
 }
 
-bool adl_validate_char_address(char const * const buffer)
+bool raat_validate_char_address(char const * const buffer)
 {
     if (!buffer) { return false; }
 
     return (isdigit(buffer[0]) && isdigit(buffer[1]));
 }
 
-ADDRESS_TYPE adl_get_address_type_from_string(char const * const s)
+ADDRESS_TYPE raat_get_address_type_from_string(char const * const s)
 {
     ADDRESS_TYPE t = ADDRESS_TYPE_NONE;
 
@@ -147,7 +147,7 @@ ADDRESS_TYPE adl_get_address_type_from_string(char const * const s)
     return t;
 }
 
-ADDRESS_TYPE adl_get_address_type_from_char(char c)
+ADDRESS_TYPE raat_get_address_type_from_char(char c)
 {
     ADDRESS_TYPE t = ADDRESS_TYPE_NONE;
 
@@ -166,7 +166,7 @@ ADDRESS_TYPE adl_get_address_type_from_char(char c)
     return t;
 }
 
-char adl_get_char_from_address_type(ADDRESS_TYPE t)
+char raat_get_char_from_address_type(ADDRESS_TYPE t)
 {
     char c = '?';
 
@@ -185,29 +185,29 @@ char adl_get_char_from_address_type(ADDRESS_TYPE t)
     return c;
 }
 
-void adl_handle_any_pending_commands()
+void raat_handle_any_pending_commands()
 {
     int reply_length = 0;
     bool valid_address_type = true;
 
     if (s_command_pending)
     {
-        memset(s_adl_tx_buffer, '\0', sizeof(s_adl_tx_buffer));
-        memset(s_adl_reply_buffer, '\0', sizeof(s_adl_reply_buffer));
+        memset(s_raat_tx_buffer, '\0', sizeof(s_raat_tx_buffer));
+        memset(s_raat_reply_buffer, '\0', sizeof(s_raat_reply_buffer));
 
-        switch(s_protocol_handler.process(s_adl_recv_buffer))
+        switch(s_protocol_handler.process(s_raat_recv_buffer))
         {
         case ADDRESS_TYPE_DEVICE:
-            reply_length = adl_process_device_command(
+            reply_length = raat_process_device_command(
                 s_protocol_handler.last_address,
                 s_protocol_handler.command,
-                s_adl_reply_buffer);
+                s_raat_reply_buffer);
             break;
         case ADDRESS_TYPE_PARAM:
-            reply_length = adl_process_param_command(
+            reply_length = raat_process_param_command(
                 s_protocol_handler.last_address,
                 s_protocol_handler.command,
-                s_adl_reply_buffer);
+                s_raat_reply_buffer);
             break;
         case ADDRESS_TYPE_MODULE:
             break;
@@ -219,74 +219,74 @@ void adl_handle_any_pending_commands()
 
         if(valid_address_type && reply_length)
         {
-            s_protocol_handler.write_reply(s_adl_tx_buffer, s_adl_reply_buffer, reply_length);
+            s_protocol_handler.write_reply(s_raat_tx_buffer, s_raat_reply_buffer, reply_length);
         }
         else if (!valid_address_type)
         {
-            strcpy(s_adl_tx_buffer, "ADDR?");
+            strcpy(s_raat_tx_buffer, "ADDR?");
         }
         else if (reply_length == 0)
         {
-            strcpy(s_adl_tx_buffer, "CMD?");
+            strcpy(s_raat_tx_buffer, "CMD?");
         }
         else
         {
-            strcpy(s_adl_tx_buffer, "ERR");
+            strcpy(s_raat_tx_buffer, "ERR");
         }
 
-        adl_board_send(s_adl_tx_buffer);
+        raat_board_send(s_raat_tx_buffer);
 
         s_command_pending = false;
         s_recv_idx = 0;
     }
 }
 
-void adl_service_timer()
+void raat_service_timer()
 {
     unsigned long time_now = millis();
 
     int i;
 
-    if ((time_now - s_timer) > ADL_TICK_MS)
+    if ((time_now - s_timer) > RAAT_TICK_MS)
     {
         s_timer = time_now;
-        if (ADL_DEVICE_COUNT)
+        if (RAAT_DEVICE_COUNT)
         {
-            for (i = 1; i <= ADL_DEVICE_COUNT; i++)
+            for (i = 1; i <= RAAT_DEVICE_COUNT; i++)
             {
-                adl_get_device(i).tick();
+                raat_get_device(i).tick();
             }
         }
     }
 }
 
-void adl_delay_start(uint8_t seconds)
+void raat_delay_start(uint8_t seconds)
 {
     while(seconds)
     {
-        adl_on_delay_start_tick(seconds);
+        raat_on_delay_start_tick(seconds);
         seconds--;
         delay(1000);
     }
 }
 
-void adl_add_incoming_command(char const * cmd)
+void raat_add_incoming_command(char const * cmd)
 {
     if (cmd)
     {
-        strncpy(s_adl_recv_buffer, cmd, ADL_BUFFER_SIZE-1);
-        s_adl_recv_buffer[ADL_BUFFER_SIZE-1] = '\0';
+        strncpy(s_raat_recv_buffer, cmd, RAAT_BUFFER_SIZE-1);
+        s_raat_recv_buffer[RAAT_BUFFER_SIZE-1] = '\0';
         s_command_pending = true;
     }
 }
 
-void adl_add_incoming_char(char c)
+void raat_add_incoming_char(char c)
 {
     s_command_pending = end_of_command(c);
     if (!s_command_pending)
     {
-        s_adl_recv_buffer[s_recv_idx++] = c;
-        s_adl_recv_buffer[s_recv_idx] = '\0';
+        s_raat_recv_buffer[s_recv_idx++] = c;
+        s_raat_recv_buffer[s_recv_idx] = '\0';
     }
 }
 

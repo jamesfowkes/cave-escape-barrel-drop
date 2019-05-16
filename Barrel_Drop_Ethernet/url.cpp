@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "adl.h"
-#include "protocol.h"
+#include "raat.hpp"
+#include "protocol.hpp"
 
 /*
 * Example command and reply:
@@ -31,13 +31,13 @@ static ADDRESS_TYPE get_address(char const * const buffer, DEVICE_ADDRESS& addr)
     paddr = skip_to_next(paddr, '/');
     paddr++;
 
-    ADDRESS_TYPE address_type = adl_get_address_type_from_string(buffer+1);
+    ADDRESS_TYPE address_type = raat_get_address_type_from_string(buffer+1);
 
-    bool valid = (address_type != ADDRESS_TYPE_NONE) && adl_validate_char_address(paddr);
+    bool valid = (address_type != ADDRESS_TYPE_NONE) && raat_validate_char_address(paddr);
 
     if (valid)
     {
-        addr = adl_chars_to_address(paddr);
+        addr = raat_chars_to_address(paddr);
     }
     return address_type;
 }

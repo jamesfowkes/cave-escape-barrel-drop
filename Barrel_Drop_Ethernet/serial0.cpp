@@ -11,28 +11,28 @@
 #include <Arduino.h>
 
 /*
- * ADL Includes
+ * RAAT Includes
  */
 
-#include "adl.h"
+#include "raat.hpp"
 
 /*
  * Private Variables
  */
 
-static adl_serial_read_char_fn * sp_adl_serial_read_char_fn;
+static raat_serial_read_char_fn * sp_raat_serial_read_char_fn;
 
 /*
  * Public Functions
  */
 
-void adl_serial_setup(long baudrate, adl_serial_read_char_fn& fn)
+void raat_serial_setup(long baudrate, raat_serial_read_char_fn& fn)
 {
     Serial.begin(baudrate);
-    sp_adl_serial_read_char_fn = &fn;
+    sp_raat_serial_read_char_fn = &fn;
 }
 
-void adl_board_send(char * to_send)
+void raat_board_send(char * to_send)
 {
     Serial.println(to_send);
 }
@@ -42,6 +42,6 @@ void serialEvent()
     while (Serial.available())
     {
 
-        (*sp_adl_serial_read_char_fn)((char)Serial.read());
+        (*sp_raat_serial_read_char_fn)((char)Serial.read());
     }
 }

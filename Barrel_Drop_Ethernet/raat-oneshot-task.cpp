@@ -6,36 +6,36 @@
 #include <stdint.h>
 
 /*
- * ADL Includes
+ * RAAT Includes
  */
 
-#include "adl.h"
+#include "raat.hpp"
 
-#include "adl-oneshot-timer.h"
-#include "adl-oneshot-task.h"
+#include "raat-oneshot-timer.hpp"
+#include "raat-oneshot-task.hpp"
 
 /*
  * Class Functions
  */
 
-ADLOneShotTask::ADLOneShotTask(uint16_t period, OneShotTaskFn pfnTask) :
+RAATOneShotTask::RAATOneShotTask(uint16_t period, OneShotTaskFn pfnTask) :
     m_timer(period), m_pfn_task(pfnTask), m_p_data(NULL)
 {
 
 }
 
-ADLOneShotTask::ADLOneShotTask(uint16_t period, OneShotTaskFn pfnTask, void * pData) : 
+RAATOneShotTask::RAATOneShotTask(uint16_t period, OneShotTaskFn pfnTask, void * pData) : 
     m_timer(period), m_pfn_task(pfnTask), m_p_data(pData)
 {
     
 }
 
-void ADLOneShotTask::start()
+void RAATOneShotTask::start()
 {
     m_timer.start();
 }
 
-bool ADLOneShotTask::run()
+bool RAATOneShotTask::run()
 {
     if (m_timer.check_and_reset())
     {
@@ -47,17 +47,17 @@ bool ADLOneShotTask::run()
     return m_timer.is_running();
 }
 
-bool ADLOneShotTask::is_running()
+bool RAATOneShotTask::is_running()
 {
     return m_timer.is_running();
 }
 
-void ADLOneShotTask::reset()
+void RAATOneShotTask::reset()
 {
     m_timer.reset();
 }
 
-void ADLOneShotTask::set_period(uint16_t period)
+void RAATOneShotTask::set_period(uint16_t period)
 {
     m_timer.set_period(period);
 }

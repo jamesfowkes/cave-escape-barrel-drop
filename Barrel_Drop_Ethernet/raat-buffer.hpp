@@ -1,11 +1,11 @@
-#ifndef _ADL_BUFFER_H_
-#define _ADL_BUFFER_H_
+#ifndef _RAAT_BUFFER_H_
+#define _RAAT_BUFFER_H_
 
-class ADLBuffer
+class RAATBuffer
 {
     public:
-        ADLBuffer(char * buffer, uint16_t length);
-        ~ADLBuffer();
+        RAATBuffer(char * buffer, uint16_t length);
+        ~RAATBuffer();
         bool writeChar(char c);
         bool writeString(const char * s);
         bool writeLine(const char * s);

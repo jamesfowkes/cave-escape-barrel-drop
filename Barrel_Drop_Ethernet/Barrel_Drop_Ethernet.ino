@@ -12,9 +12,11 @@
 
 /*
 Barrel Drop Ethernet
-Created on 2019-01-14
-By the Arduino Description Language tool.
- 
+Created on 2019-05-16
+By the Rapid Arduino Application Tool.
+
+RAAT Repo Info: Branch: master, SHA: a109eefd (repo is dirty)
+
 
         An ethernet activated relay 
     
@@ -26,73 +28,63 @@ By the Arduino Description Language tool.
 
 #include <stdint.h>
 
-#include "adl.h"
+#include "raat.hpp"
 
 
 #include <EtherCard.h>
 
 
 
-    #include "adl-util-limited-range-int.h"
+    #include "raat-util-limited-range-int.hpp"
 
 
 
-#include "ENC28J60ADL.h"
+#include "ENC28J60RAAT.hpp"
 
-#include "digital-output.h"
-
-
-
-#include "integer-param.h"
+#include "digital-output.hpp"
 
 
 
-static ENC28J60ADL s_ethernet = ENC28J60ADL();
+#include "integer-param.hpp"
+
+
+
+static ENC28J60RAAT s_ethernet = ENC28J60RAAT(10);
 
 static DigitalOutput s_relay_output = DigitalOutput(2);
 
 
-static DeviceBase * s_device_pointers[] = 
+static DeviceBase * s_device_pointers[2] =
 {
-    
-    &s_ethernet
-    
-    ,
-    
-    
+    &s_ethernet,
     &s_relay_output
     
-    
 };
 
-static const adl_devices_struct adl_devices = {
+static const raat_devices_struct raat_devices = {
     
-    .pEthernet =  &s_ethernet
+    .pEthernet =  &s_ethernet,
     
-    ,
+    .pRelay_Output =  &s_relay_output,
     
-    
-    .pRelay_Output =  &s_relay_output
-    
+
     
 };
 
 
-static IntegerParam s_on_time = IntegerParam(0, 0, INT32_MAX, true, true);
+static IntegerParam<uint16_t> s_on_time = IntegerParam<uint16_t>(0, 0, UINT16_MAX, true, true);
 
 
-static ParameterBase * s_params_pointers[] = 
+static ParameterBase * s_params_pointers[1] =
 {
-    
     &s_on_time
     
-    
 };
 
-static const adl_params_struct adl_params = {
+static const raat_params_struct raat_params = {
+    .pOn_Time = &s_on_time,
     
-    .pOn_Time =  &s_on_time
-    
+
     
 };
 
@@ -112,7 +104,7 @@ int handle_device2_command(char const * const command, char * reply)
 }
 
 
-static COMMAND_HANDLER adl_device_command_handlers[] = {
+static COMMAND_HANDLER raat_device_command_handlers[] = {
     
     handle_device1_command,
     
@@ -120,12 +112,12 @@ static COMMAND_HANDLER adl_device_command_handlers[] = {
     
 };
 
-COMMAND_HANDLER& adl_get_device_cmd_handler(DEVICE_ADDRESS address)
+COMMAND_HANDLER& raat_get_device_cmd_handler(DEVICE_ADDRESS address)
 {
-    return adl_device_command_handlers[address-1];
+    return raat_device_command_handlers[address-1];
 }
 
-DeviceBase& adl_get_device(DEVICE_ADDRESS address)
+DeviceBase& raat_get_device(DEVICE_ADDRESS address)
 {
     return *s_device_pointers[address-1];
 }
@@ -137,18 +129,18 @@ int handle_param1_command(char const * const command, char * reply)
 }
 
 
-static COMMAND_HANDLER adl_param_command_handlers[] = {
+static COMMAND_HANDLER raat_param_command_handlers[] = {
     
     handle_param1_command,
     
 };
 
-COMMAND_HANDLER& adl_get_param_cmd_handler(PARAM_ADDRESS address)
+COMMAND_HANDLER& raat_get_param_cmd_handler(PARAM_ADDRESS address)
 {
-    return adl_param_command_handlers[address-1];
+    return raat_param_command_handlers[address-1];
 }
 
-ParameterBase& adl_get_param(PARAM_ADDRESS address)
+ParameterBase& raat_get_param(PARAM_ADDRESS address)
 {
     return *s_params_pointers[address-1];
 }
@@ -157,13 +149,13 @@ ParameterBase& adl_get_param(PARAM_ADDRESS address)
 
 void setup()
 {
-    adl_on_setup_start();
+    raat_on_setup_start();
 
-    adl_serial_setup(115200, adl_add_incoming_char);
-    
-    adl_nonvolatile_setup();
+    raat_serial_setup(115200, raat_add_incoming_char);
 
-    adl_logging_setup(Serial);
+    raat_nonvolatile_setup();
+
+    raat_logging_setup(Serial);
 
     
     // Setup for Ethernet
@@ -181,13 +173,13 @@ void setup()
     // END On Time setup
     
 
-    adl_custom_setup(adl_devices, adl_params);
+    raat_custom_setup(raat_devices, raat_params);
 
-    adl_on_setup_complete();
-    
+    raat_on_setup_complete();
+
     if (0)
     {
-        adl_delay_start( 0 );
+        raat_delay_start( 0 );
     }
 }
 
@@ -195,9 +187,9 @@ void setup()
 
 void loop()
 {
-    adl_handle_any_pending_commands();
-    adl_service_timer();
-    adl_custom_loop(adl_devices, adl_params);
+    raat_handle_any_pending_commands();
+    raat_service_timer();
+    raat_custom_loop(raat_devices, raat_params);
 }
 
 

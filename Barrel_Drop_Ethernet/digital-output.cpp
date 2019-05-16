@@ -1,6 +1,6 @@
-#include "adl.h"
+#include "raat.hpp"
 
-#include "digital-output.h"
+#include "digital-output.hpp"
 
 DigitalOutput::DigitalOutput(int pin)
 {
@@ -54,6 +54,11 @@ void DigitalOutput::set(bool on)
 {
     digitalWrite(m_pin, on ? HIGH : LOW);
     pinMode(m_pin, OUTPUT);
+}
+
+bool DigitalOutput::state()
+{
+    return digitalRead(m_pin) == HIGH;
 }
 
 void DigitalOutput::tristate()

@@ -1,22 +1,32 @@
 #include <EtherCard.h>
 
-#include "adl.h"
+#include "raat.hpp"
 
-#include "ENC28J60ADL.h"
+#include "ENC28J60RAAT.hpp"
 
 byte Ethernet::buffer[ENC28J60_BUFFER_SIZE];
 
-ENC28J60ADL::ENC28J60ADL()
+static const char IP_FORMAT[] PROGRAM_MEMORY = "IP: %d.%d.%d.%d";
+static const char MAC_FORMAT[] PROGRAM_MEMORY = "MAC: %02x:%02x:%02x:%02x:%02x:%02x";
+static const char GATEWAY_FORMAT[] PROGRAM_MEMORY = "Gateway: %d.%d.%d.%d";
+
+static const char INIT_STRING[] PROGRAM_MEMORY = "Initialising ENC28J60...";
+static const char CONFIG_STRING[] PROGRAM_MEMORY = "Configuring network params...";
+static const char FAIL_STRING[] PROGRAM_MEMORY = "Failed to access ENC28J60";
+
+ENC28J60RAAT::ENC28J60RAAT(uint8_t cs_pin) :
+    m_cs_pin(cs_pin)
 {
+
     m_mac_eeprom_location.size = 6;
     m_ip_eeprom_location.size = 4;
     m_gateway_eeprom_location.size = 4;
-    adl_nv_alloc(m_mac_eeprom_location);
-    adl_nv_alloc(m_ip_eeprom_location);
-    adl_nv_alloc(m_gateway_eeprom_location);
+    raat_nv_alloc(m_mac_eeprom_location);
+    raat_nv_alloc(m_ip_eeprom_location);
+    raat_nv_alloc(m_gateway_eeprom_location);
 }
 
-void ENC28J60ADL::tick()
+void ENC28J60RAAT::tick()
 {
     word len = ether.packetReceive();
     word pos = ether.packetLoop(len);
@@ -28,40 +38,42 @@ void ENC28J60ADL::tick()
     }
 }
 
-void ENC28J60ADL::reset()
+void ENC28J60RAAT::reset()
 {
 
 }
 
-void ENC28J60ADL::print_settings()
+void ENC28J60RAAT::print_settings()
 {
-    adl_logln(LOG_ADL, "IP: %d.%d.%d.%d",
+    raat_logln_P(LOG_RAAT, IP_FORMAT,
         m_ip_address[0], m_ip_address[1], m_ip_address[2], m_ip_address[3]);
-    adl_logln(LOG_ADL, "MAC: %02x:%02x:%02x:%02x:%02x:%02x",
+    raat_logln_P(LOG_RAAT, MAC_FORMAT,
         m_mac_address[0], m_mac_address[1], m_mac_address[2], m_mac_address[3], m_mac_address[4], m_mac_address[5]);
-    adl_logln(LOG_ADL, "Gateway: %d.%d.%d.%d",
+    raat_logln_P(LOG_RAAT, GATEWAY_FORMAT,
         m_gateway[0], m_gateway[1], m_gateway[2], m_gateway[3]);
 }
 
-void ENC28J60ADL::setup()
+void ENC28J60RAAT::setup()
 {
     this->reset();
 
-    adl_nv_load(m_mac_address, m_mac_eeprom_location);
-    adl_nv_load(m_ip_address, m_ip_eeprom_location);
-    adl_nv_load(m_gateway, m_gateway_eeprom_location);
+    raat_nv_load(m_mac_address, m_mac_eeprom_location);
+    raat_nv_load(m_ip_address, m_ip_eeprom_location);
+    raat_nv_load(m_gateway, m_gateway_eeprom_location);
 
     this->print_settings();
 
-    if (ether.begin(ENC28J60_BUFFER_SIZE, m_mac_address) == 0) 
+    raat_logln_P(LOG_RAAT, INIT_STRING);
+    if (ether.begin(ENC28J60_BUFFER_SIZE, m_mac_address, m_cs_pin) == 0) 
     {
-        adl_logln(LOG_ADL, "Failed to access Ethernet controller");
+        raat_logln_P(LOG_RAAT, FAIL_STRING);
     }
 
+    raat_logln_P(LOG_RAAT, CONFIG_STRING);
     ether.staticSetup(m_ip_address, m_gateway);
 }
 
-int ENC28J60ADL::handle_set_command(char const * const command, char * reply)
+int ENC28J60RAAT::handle_set_command(char const * const command, char * reply)
 {
     enum 
     {
@@ -84,7 +96,7 @@ int ENC28J60ADL::handle_set_command(char const * const command, char * reply)
         if (result == OK)
         {
             for (uint8_t i=0; i<6; i++) { m_mac_address[i] = local_scan_buffer[i]; }
-            adl_nv_save(m_mac_address, m_mac_eeprom_location);
+            raat_nv_save(m_mac_address, m_mac_eeprom_location);
         }
     }
     else if (strncmp(command, "IP", 2) == 0)
@@ -96,7 +108,7 @@ int ENC28J60ADL::handle_set_command(char const * const command, char * reply)
         if (result == OK)
         {
             for (uint8_t i=0; i<4; i++) { m_ip_address[i] = local_scan_buffer[i]; }
-            adl_nv_save(m_ip_address, m_ip_eeprom_location);
+            raat_nv_save(m_ip_address, m_ip_eeprom_location);
         }
     }
     else if (strncmp(command, "GWAY", 4) == 0)
@@ -108,7 +120,7 @@ int ENC28J60ADL::handle_set_command(char const * const command, char * reply)
         if (result == OK)
         {
             for (uint8_t i=0; i<4; i++) { m_gateway[i] = local_scan_buffer[i]; }
-            adl_nv_save(m_gateway, m_gateway_eeprom_location);
+            raat_nv_save(m_gateway, m_gateway_eeprom_location);
         }
     }
 
@@ -131,7 +143,7 @@ int ENC28J60ADL::handle_set_command(char const * const command, char * reply)
     return reply_length;
 }
 
-int ENC28J60ADL::command_handler(char const * const command, char * reply)
+int ENC28J60RAAT::command_handler(char const * const command, char * reply)
 {
     int reply_length = 0;
 
@@ -149,7 +161,7 @@ int ENC28J60ADL::command_handler(char const * const command, char * reply)
     return reply_length;
 }
 
-word ENC28J60ADL::sendEthernet(char * to_send)
+word ENC28J60RAAT::sendEthernet(char * to_send)
 {
     m_bfill = ether.tcpOffset();
     m_bfill.emit_raw(to_send, strlen(to_send));

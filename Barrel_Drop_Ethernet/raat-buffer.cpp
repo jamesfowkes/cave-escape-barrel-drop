@@ -9,17 +9,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "adl-buffer.h"
+#include "raat-buffer.hpp"
 
-/* ADLBuffer class */
+/* RAATBuffer class */
 
 /*
- * ADLBuffer::ADLBuffer
+ * RAATBuffer::RAATBuffer
  *
  * Init the buffer using a buffer and length of that buffer (INCLUDING space for terminating '\0')
  */
 
-ADLBuffer::ADLBuffer(char * buffer, uint16_t length)
+RAATBuffer::RAATBuffer(char * buffer, uint16_t length)
 {
     if (buffer)
     {
@@ -31,16 +31,16 @@ ADLBuffer::ADLBuffer(char * buffer, uint16_t length)
     }
 }
 
-ADLBuffer::~ADLBuffer() {}
+RAATBuffer::~RAATBuffer() {}
 
 /*
- * ADLBuffer::writeChar
+ * RAATBuffer::writeChar
  *
  * If there is space in the buffer, add the char to the string
  * Returns true if char was written, false if not
  */
 
-bool ADLBuffer::writeChar(char c)
+bool RAATBuffer::writeChar(char c)
 {
     if (m_buffer && m_writeIndex < m_maxLength)
     {
@@ -52,14 +52,14 @@ bool ADLBuffer::writeChar(char c)
 }
 
 /*
- * ADLBuffer::writeString
+ * RAATBuffer::writeString
  *
  * Copies chars from s until s is exhausted or the buffer is full
  * Therefore, this function may only copy a partial length of s
  * Returns true if ALL of s was copied;
  */
 
-bool ADLBuffer::writeString(const char * s)
+bool RAATBuffer::writeString(const char * s)
 {
     if (!s) { return false; }
     
@@ -73,12 +73,12 @@ bool ADLBuffer::writeString(const char * s)
 }
 
 /*
- * ADLBuffer::writeLine
+ * RAATBuffer::writeLine
  *
  * As per writeString, but appends "\r\n" in addition to copying from s
  */
 
-bool ADLBuffer::writeLine(const char * s)
+bool RAATBuffer::writeLine(const char * s)
 {
     bool success = true;
     success &= writeString(s);
@@ -87,35 +87,35 @@ bool ADLBuffer::writeLine(const char * s)
 }
 
 /*
- * ADLBuffer::reset
+ * RAATBuffer::reset
  *
  * Makes the buffer appear to be an empty string
  */
 
-void ADLBuffer::reset(void)
+void RAATBuffer::reset(void)
 {
     m_writeIndex = 0;
     m_buffer[m_writeIndex] = '\0';
 }
 
 /*
- * ADLBuffer::c_str
+ * RAATBuffer::c_str
  *
  * Returns pointer to the actual buffer
  */
 
-char * ADLBuffer::c_str(void)
+char * RAATBuffer::c_str(void)
 {
     return m_buffer;
 }
 
 /*
- * ADLBuffer::attach
+ * RAATBuffer::attach
  *
  * Redirects the buffer to point at a new buffer
  */
 
-void ADLBuffer::attach(char * buffer, uint16_t length)
+void RAATBuffer::attach(char * buffer, uint16_t length)
 {
     if (buffer)
     {
@@ -126,23 +126,23 @@ void ADLBuffer::attach(char * buffer, uint16_t length)
 }
 
 /*
- * ADLBuffer::full
+ * RAATBuffer::full
  *
  * Returns true if the buffer is full
  */
  
-bool ADLBuffer::isFull(void)
+bool RAATBuffer::isFull(void)
 {
     return m_writeIndex == m_maxLength;
 }
 
 /*
- * ADLBuffer::detach
+ * RAATBuffer::detach
  *
  * Leaves the buffer floating (and therefore safe)
  */
 
-void ADLBuffer::detach(void)
+void RAATBuffer::detach(void)
 {
     m_buffer = NULL;
     m_maxLength = 0;
@@ -150,23 +150,23 @@ void ADLBuffer::detach(void)
 }
 
 /*
- * ADLBuffer::length
+ * RAATBuffer::length
  *
  * Returns the current length of the written buffer based on write index
  */
 
-uint16_t ADLBuffer::length(void)
+uint16_t RAATBuffer::length(void)
 {
     return m_writeIndex;
 }
 
 /*
- * ADLBuffer::remove
+ * RAATBuffer::remove
  *
  * Removes chars from the end of the buffer by placing a '\0' in the appropriate position
  */
 
-void ADLBuffer::remove(uint32_t chars)
+void RAATBuffer::remove(uint32_t chars)
 {
     if (chars > m_writeIndex)
     {
@@ -180,7 +180,7 @@ void ADLBuffer::remove(uint32_t chars)
     m_buffer[m_writeIndex] = '\0';
 }
 
-bool ADLBuffer::writeStringP(const char * s)
+bool RAATBuffer::writeStringP(const char * s)
 {
     bool success = false;
     if (s)
@@ -191,11 +191,12 @@ bool ADLBuffer::writeStringP(const char * s)
             memcpy_P(&m_buffer[m_writeIndex], s, len);
         }
         m_writeIndex += len;
+        m_buffer[m_writeIndex] = '\0';
     }
     return success;
 }
 
-bool ADLBuffer::writeLineP(const char * s)
+bool RAATBuffer::writeLineP(const char * s)
 {
     bool success = true;
     success &= writeStringP(s);
@@ -203,7 +204,7 @@ bool ADLBuffer::writeLineP(const char * s)
     return success;
 }
 
-int ADLBuffer::strncmp(char * needle, int n)
+int RAATBuffer::strncmp(char * needle, int n)
 {
 	return ::strncmp(this->c_str(), needle, n);
 }

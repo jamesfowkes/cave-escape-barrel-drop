@@ -1,6 +1,8 @@
 #ifndef _PARAMETER_H_
 #define _PARAMETER_H_
 
+#include <stddef.h>
+
 class ParameterBase
 {
 public:
@@ -18,13 +20,11 @@ public:
         if (!m_use_eeprom)
         {
             this->reset();
-            adl_logln(LOG_ADL, "Reset");
         }
         else
         {
-            adl_nv_alloc(m_eeprom_location);
+            raat_nv_alloc(m_eeprom_location);
             this->load();    
-            adl_logln(LOG_ADL, "Load");
         }
         m_setup_done = true;
     }
@@ -46,7 +46,7 @@ protected:
     bool m_changed = false;
     bool m_setup_done = false;
 
-    ADL_NV_LOCATION m_eeprom_location;
+    RAAT_NV_LOCATION m_eeprom_location;
 
     void on_change()
     {
@@ -67,8 +67,8 @@ public:
     void setup() {};
     int command_handler(char const * const command, char * reply);
 
-    void save() { adl_nv_save(&m_data, m_eeprom_location); }
-    void load() { adl_nv_load(&m_data, m_eeprom_location); }
+    void save() { raat_nv_save(&m_data, m_eeprom_location); }
+    void load() { raat_nv_load(&m_data, m_eeprom_location); }
 
     int32_t m_data;
     char m_last_command[128];
