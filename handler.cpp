@@ -31,12 +31,15 @@ static void send_standard_erm_response()
 
 static void relay_open(char const * const url)
 {
+
     int32_t timeout;
 
     char const * const pTime = &url[13];
 
     bool success = false;
 
+    Serial.println("Got barrel open command");
+    
     send_standard_erm_response();
 
     if ((success = raat_parse_single_numeric(pTime, timeout, NULL)))
